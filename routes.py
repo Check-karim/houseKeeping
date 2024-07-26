@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, flash, session, redirect, url_for
-from models.models import User, Housekeeper, Admin
+from models.models import User, Housekeeper, Admin, Task
 
 main = Blueprint('main', __name__)  # routename= main
 
@@ -78,7 +78,8 @@ def housekeeper_dashboard():
 @main.route('/admin_dashboard', methods=['GET'])
 def admin_dashboard():
     if 'user_id' in session and session.get('user_type') == 'admin':
-        return render_template("admin_dashboard.html")
+        admin = Admin.query.filter_by(id=session['user_id']).first()
+        return render_template("admin_dashboard.html", admin=admin)
     else:
         return redirect(url_for('main.home'))
 
@@ -86,3 +87,33 @@ def admin_dashboard():
 def logout():
     session.clear()
     return redirect(url_for('main.home'))
+
+@main.route('/admin_update', methods=['POST'])
+def admin_update():
+    if 'user_id' in session and session.get('user_type') == 'admin':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        admin = Admin.query.filter_by(id=session['user_id']).first()
+
+        if email:
+            admin.email = email
+        if password:
+            admin.password = password
+        
+        try:
+            admin.save()
+            flash('Account updated successfully!')
+        except:
+            flash('Update failed. Please try again.')
+
+        return redirect(url_for('main.admin_dashboard'))
+    else:
+        return redirect(url_for('main.home'))
+
+@main.route('/admin_tasks', methods=['GET'])
+def admin_tasks():
+    if 'user_id' in session and session.get('user_type') == 'admin':
+        tasks = Task.query.all()  # Ensure you have a Task model defined
+        return render_template("admin_tasks.html", tasks=tasks)
+    else:
+        return redirect(url_for('main.home'))
