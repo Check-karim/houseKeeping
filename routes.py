@@ -64,7 +64,10 @@ def login():
 @main.route('/user_dashboard', methods=['GET'])
 def user_dashboard():
     if 'user_id' in session and session.get('user_type') == 'user':
-        return render_template("user_dashboard.html")
+        user = User.query.filter_by(id=session['user_id']).first()
+        task = Task()
+        tasks = task.get_by_user_id(user_id=session['user_id'])
+        return render_template("user_dashboard.html", user=user, tasks = tasks)
     else:
         return redirect(url_for('main.home'))
 
@@ -115,5 +118,59 @@ def admin_tasks():
     if 'user_id' in session and session.get('user_type') == 'admin':
         tasks = Task.query.all()  # Ensure you have a Task model defined
         return render_template("admin_tasks.html", tasks=tasks)
+    else:
+        return redirect(url_for('main.home'))
+
+@main.route('/create_task', methods=['POST'])
+def create_task():
+    if 'user_id' in session and session.get('user_type') == 'user':
+        user_id = session['user_id']
+        address = request.form.get('address')
+        phone = request.form.get('phone')
+        summary = request.form.get('summary')
+        description = request.form.get('description')
+        price = request.form.get('price')
+
+        new_task = Task(
+            user_id=user_id,
+            address=address,
+            phone=phone,
+            summary=summary,
+            description=description,
+            price=price,
+            housekeeper_id=0,  # or assign based on some logic
+            is_done=False
+        )
+
+        try:
+            new_task.save()
+            flash('Task created successfully!')
+        except:
+            flash('Failed to create task. Please try again.')
+
+        return redirect(url_for('main.user_dashboard'))
+    else:
+        return redirect(url_for('main.home'))
+
+
+@main.route('/user_update', methods=['POST'])
+def user_update():
+    if 'user_id' in session and session.get('user_type') == 'user':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(id=session['user_id']).first()
+
+        if email:
+            user.email = email
+        if password:
+            user.password = password
+        
+        try:
+            user.save()
+            flash('Account updated successfully!')
+        except:
+            flash('Update failed. Please try again.')
+
+        return redirect(url_for('main.user_dashboard'))
     else:
         return redirect(url_for('main.home'))

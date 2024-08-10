@@ -122,7 +122,11 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     housekeeper_id = db.Column(db.Integer, nullable=False)
+    address = db.Column(db.String(255), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    summary = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
+    price = db.Column(db.Float, nullable=False)
     is_done = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime(), nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), nullable=False, server_default=db.func.now(), onupdate=db.func.now())
@@ -133,7 +137,11 @@ class Task(db.Model):
             'id': self.id,
             'user_id': self.user_id,
             'housekeeper_id': self.housekeeper_id,
+            'address': self.address,
+            'phone': self.phone,
+            'summary': self.summary,
             'description': self.description,
+            'price': self.price,
             'is_done': self.is_done
         }
 
@@ -144,3 +152,7 @@ class Task(db.Model):
     @classmethod
     def get_all(cls):
         return cls.query.all()
+    
+    @classmethod
+    def get_by_user_id(cls, user_id):
+        return cls.query.filter(cls.user_id == user_id).all()
