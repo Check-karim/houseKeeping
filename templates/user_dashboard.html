@@ -2,7 +2,7 @@
 {% block title %}User Dashboard{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h1>Welcome to the User Dashboard</h1>
+    <h1>Welcome to Your Dashboard</h1>
 
     <!-- Logout Button -->
     <a href="{{ url_for('main.logout') }}" class="btn btn-danger mb-3">Logout</a>
@@ -10,7 +10,7 @@
     <!-- Tabs for navigation -->
     <ul class="nav nav-tabs" id="userTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="view-tasks-tab" data-bs-toggle="tab" href="#view-tasks" role="tab">View Tasks</a>
+            <a class="nav-link active" id="tasks-tab" data-bs-toggle="tab" href="#tasks" role="tab">My Tasks</a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="create-task-tab" data-bs-toggle="tab" href="#create-task" role="tab">Create Task</a>
@@ -21,26 +21,31 @@
     </ul>
 
     <div class="tab-content" id="userTabsContent">
-        <!-- View Tasks Tab -->
-        <div class="tab-pane fade show active" id="view-tasks" role="tabpanel" aria-labelledby="view-tasks-tab">
+        <!-- My Tasks Tab -->
+        <div class="tab-pane fade show active" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
             <table class="table mt-3">
                 <thead>
                     <tr>
                         <th>Task ID</th>
+                        <th>Housekeeper ID</th>
                         <th>Summary</th>
-                        <th>Address</th>
+                        <th>Price</th>
                         <th>Status</th>
-                        <th>Price (RWF)</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for task in tasks %}
                     <tr>
                         <td>{{ task.id }}</td>
+                        <td>{{ task.housekeeper_id }}</td>
                         <td>{{ task.summary }}</td>
-                        <td>{{ task.address }}</td>
-                        <td>{{ 'Completed' if task.is_done else 'Pending' }}</td>
                         <td>{{ task.price }}</td>
+                        <td>{{ 'Completed' if task.is_done else 'Pending' }}</td>
+                        <td>
+                            <a href="{{ url_for('main.update_task', task_id=task.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="{{ url_for('main.delete_task', task_id=task.id) }}" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -59,12 +64,12 @@
                     <input type="text" class="form-control" id="phone" name="phone" required>
                 </div>
                 <div class="mb-3">
-                    <label for="summary" class="form-label">Summary</label>
+                    <label for="summary" class="form-label">Summary Description</label>
                     <input type="text" class="form-control" id="summary" name="summary" required>
                 </div>
                 <div class="mb-3">
-                    <label for="description" class="form-label">Full Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    <label for="full-description" class="form-label">Full Description</label>
+                    <textarea class="form-control" id="full-description" name="full_description" required></textarea>
                 </div>
                 <div class="mb-3">
                     <label for="price" class="form-label">Price (RWF)</label>
@@ -76,16 +81,16 @@
 
         <!-- Update Account Tab -->
         <div class="tab-pane fade" id="update-account" role="tabpanel" aria-labelledby="update-account-tab">
-            <form method="post" action="{{ url_for('main.user_update') }}">
+            <form method="post" action="{{ url_for('main.update_user_account') }}">
                 <div class="mb-3">
                     <label for="email" class="form-label">Email address</label>
-                    <input type="email" value="{{user.email}}" class="form-control" id="email" name="email" required>
+                    <input type="email" value="{{ user.email }}" class="form-control" id="email" name="email" required>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
                     <input type="password" class="form-control" id="password" name="password">
                 </div>
-                <button type="submit" class="btn btn-primary">Update</button>
+                <button type="submit" class="btn btn-primary">Update Account</button>
             </form>
         </div>
     </div>

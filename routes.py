@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, flash, session, redirect, url_for
 from models.models import User, Housekeeper, Admin, Task
+from extensions import db
 
 main = Blueprint('main', __name__)  # routename= main
 
@@ -153,8 +154,8 @@ def create_task():
         return redirect(url_for('main.home'))
 
 
-@main.route('/user_update', methods=['POST'])
-def user_update():
+@main.route('/update_user_account', methods=['POST'])
+def update_user_account():
     if 'user_id' in session and session.get('user_type') == 'user':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -171,6 +172,38 @@ def user_update():
         except:
             flash('Update failed. Please try again.')
 
+        return redirect(url_for('main.user_dashboard'))
+    else:
+        return redirect(url_for('main.home'))
+
+@main.route('/update_task/<int:task_id>', methods=['GET', 'POST'])
+def update_task(task_id):
+    if 'user_id' in session and session.get('user_type') == 'user':
+        task = Task.query.filter_by(id=task_id, user_id=session['user_id']).first()
+
+        if request.method == 'POST':
+            task.description = request.form.get('description')
+            task.full_description = request.form.get('full_description')
+            task.address = request.form.get('address')
+            task.phone = request.form.get('phone')
+            task.price = request.form.get('price')
+            task.save()
+
+            flash('Task updated successfully!')
+            return redirect(url_for('main.user_dashboard'))
+
+        return render_template('update_task.html', task=task)
+    else:
+        return redirect(url_for('main.home'))
+
+@main.route('/delete_task/<int:task_id>', methods=['GET'])
+def delete_task(task_id):
+    if 'user_id' in session and session.get('user_type') == 'user':
+        task = Task.query.filter_by(id=task_id, user_id=session['user_id']).first()
+        if task:
+            db.session.delete(task)
+            db.session.commit()
+            flash('Task deleted successfully!')
         return redirect(url_for('main.user_dashboard'))
     else:
         return redirect(url_for('main.home'))
