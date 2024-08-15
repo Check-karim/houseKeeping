@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Update Task Status{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Update Task Status</h1>
+
+    <!-- Logout Button -->
+    <a href="{{ url_for('main.logout') }}" class="btn btn-danger mb-3">Logout</a>
+
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <form method="post" action="{{ url_for('main.update_task_status', task_id=task.id) }}">
+        <div class="mb-3">
+            <label for="task_summary" class="form-label">Task Description</label>
+            <input type="text" class="form-control" id="task_summary" value="{{ task.description }}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="task_status" class="form-label">Task Status</label>
+            <select class="form-select" id="task_status" name="task_status" required>
+                <option value="0" {% if not task.is_done %}selected{% endif %}>Pending</option>
+                <option value="1" {% if task.is_done %}selected{% endif %}>Done</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Status</button>
+    </form>
+</div>
+{% endblock %}

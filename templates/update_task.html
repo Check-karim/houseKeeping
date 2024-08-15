@@ -6,11 +6,11 @@
     <form method="post" action="{{ url_for('main.update_task', task_id=task.id) }}">
         <div class="mb-3">
             <label for="description" class="form-label">Summary Description</label>
-            <input type="text" class="form-control" id="description" name="description" value="{{ task.description }}" required>
+            <input type="text" class="form-control" id="description" name="description" value="{{ task.summary }}" required>
         </div>
         <div class="mb-3">
             <label for="full-description" class="form-label">Full Description</label>
-            <textarea class="form-control" id="full-description" name="full_description" required>{{ task.full_description }}</textarea>
+            <textarea class="form-control" id="full-description" name="full_description" required>{{ task.description }}</textarea>
         </div>
         <div class="mb-3">
             <label for="address" class="form-label">Address</label>

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, flash, session, redirect, url_for
 from models.models import User, Housekeeper, Admin, Task
 from extensions import db
+from sqlalchemy.exc import SQLAlchemyError
 
 main = Blueprint('main', __name__)  # routename= main
 
@@ -75,7 +76,14 @@ def user_dashboard():
 @main.route('/housekeeper_dashboard', methods=['GET'])
 def housekeeper_dashboard():
     if 'user_id' in session and session.get('user_type') == 'housekeeper':
-        return render_template("housekeeper_dashboard.html")
+        housekeeper_id = session['user_id']
+        housekeeper = Housekeeper.query.filter_by(id=session['user_id']).first()
+        available_tasks = db.session.query(Task, User).join(User, Task.user_id == User.id).filter(Task.is_taken == False).all()
+        managed_tasks = Task.query.filter_by(housekeeper_id=housekeeper_id).all()
+
+        print(housekeeper)
+
+        return render_template("housekeeper_dashboard.html",housekeeper=housekeeper, available_tasks=available_tasks, managed_tasks=managed_tasks)
     else:
         return redirect(url_for('main.home'))
 
@@ -129,7 +137,7 @@ def create_task():
         address = request.form.get('address')
         phone = request.form.get('phone')
         summary = request.form.get('summary')
-        description = request.form.get('description')
+        description = request.form.get('full_description')
         price = request.form.get('price')
 
         new_task = Task(
@@ -145,9 +153,13 @@ def create_task():
 
         try:
             new_task.save()
-            flash('Task created successfully!')
-        except:
-            flash('Failed to create task. Please try again.')
+            flash('Task created successfully!', 'success')
+        except SQLAlchemyError as e:
+            # Flash the specific error message
+            flash(f'Failed to create task due to a database error: {str(e)}', 'error')
+        except Exception as e:
+            # Flash any other errors
+            flash(f'Failed to create task. Error: {str(e)}', 'error')
 
         return redirect(url_for('main.user_dashboard'))
     else:
@@ -182,8 +194,8 @@ def update_task(task_id):
         task = Task.query.filter_by(id=task_id, user_id=session['user_id']).first()
 
         if request.method == 'POST':
-            task.description = request.form.get('description')
-            task.full_description = request.form.get('full_description')
+            task.summary = request.form.get('description')
+            task.description = request.form.get('full_description')
             task.address = request.form.get('address')
             task.phone = request.form.get('phone')
             task.price = request.form.get('price')
@@ -205,5 +217,99 @@ def delete_task(task_id):
             db.session.commit()
             flash('Task deleted successfully!')
         return redirect(url_for('main.user_dashboard'))
+    else:
+        return redirect(url_for('main.home'))
+    
+
+@main.route('/accept_task/<int:task_id>', methods=['GET'])
+def accept_task(task_id):
+    if 'user_id' in session and session.get('user_type') == 'housekeeper':
+        task = Task.query.get_or_404(task_id)
+        if task.is_taken:
+            flash('This task has already been accepted by another housekeeper.')
+            return redirect(url_for('main.housekeeper_dashboard'))
+        
+        task.is_taken = True
+        task.housekeeper_id = session['user_id']
+        try:
+            db.session.commit()
+            flash('Task successfully accepted!')
+        except SQLAlchemyError as e:
+            flash(f'Failed to accept task due to a database error: {str(e)}', 'error')
+        except Exception as e:
+            flash(f'Failed to accept task. Error: {str(e)}', 'error')
+
+        return redirect(url_for('main.housekeeper_dashboard'))
+    else:
+        return redirect(url_for('main.home'))
+
+@main.route('/deny_task/<int:task_id>', methods=['GET'])
+def deny_task(task_id):
+    if 'user_id' in session and session.get('user_type') == 'housekeeper':
+        task = Task.query.get_or_404(task_id)
+        if task.housekeeper_id != session['user_id']:
+            flash('You are not authorized to deny this task.')
+            return redirect(url_for('main.housekeeper_dashboard'))
+
+        task.is_taken = False
+        task.housekeeper_id = None
+        try:
+            db.session.commit()
+            flash('Task successfully denied.')
+        except SQLAlchemyError as e:
+            flash(f'Failed to deny task due to a database error: {str(e)}', 'error')
+        except Exception as e:
+            flash(f'Failed to deny task. Error: {str(e)}', 'error')
+
+        return redirect(url_for('main.housekeeper_dashboard'))
+    else:
+        return redirect(url_for('main.home'))
+
+@main.route('/update_task_status/<int:task_id>', methods=['GET', 'POST'])
+def update_task_status(task_id):
+    if 'user_id' in session and session.get('user_type') == 'housekeeper':
+        task = Task.query.get_or_404(task_id)
+        if task.housekeeper_id != session['user_id']:
+            flash('You are not authorized to update the status of this task.')
+            return redirect(url_for('main.housekeeper_dashboard'))
+
+        if request.method == 'POST':
+            task.is_done = not task.is_done
+            try:
+                db.session.commit()
+                flash('Task status updated successfully.')
+            except SQLAlchemyError as e:
+                flash(f'Failed to update task status due to a database error: {str(e)}', 'error')
+            except Exception as e:
+                flash(f'Failed to update task status. Error: {str(e)}', 'error')
+
+            return redirect(url_for('main.housekeeper_dashboard'))
+
+        return render_template('update_task_status.html', task=task)
+    else:
+        return redirect(url_for('main.home'))
+
+@main.route('/update_housekeeper_account', methods=['POST'])
+def update_housekeeper_account():
+    if 'user_id' in session and session.get('user_type') == 'housekeeper':
+        housekeeper = Housekeeper.query.get_or_404(session['user_id'])
+        
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if email:
+            housekeeper.email = email
+        if password:
+            housekeeper.password = password
+        
+        try:
+            db.session.commit()
+            flash('Account updated successfully!')
+        except SQLAlchemyError as e:
+            flash(f'Failed to update account due to a database error: {str(e)}', 'error')
+        except Exception as e:
+            flash(f'Failed to update account. Error: {str(e)}', 'error')
+
+        return redirect(url_for('main.housekeeper_dashboard'))
     else:
         return redirect(url_for('main.home'))
