@@ -1,4 +1,104 @@
 {% extends "base.html" %}
-{% block title %} HKMS - Housekeeper {% endblock %}
+{% block title %}Housekeeper Dashboard{% endblock %}
 {% block content %}
+<div class="container mt-5">
+    <h1>Welcome to Your Dashboard</h1>
+
+    <!-- Logout Button -->
+    <a href="{{ url_for('main.logout') }}" class="btn btn-danger mb-3">Logout</a>
+
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <!-- Tabs for navigation -->
+    <ul class="nav nav-tabs" id="housekeeperTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="tasks-tab" data-bs-toggle="tab" href="#tasks" role="tab">Available Tasks</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="manage-tasks-tab" data-bs-toggle="tab" href="#manage-tasks" role="tab">Manage Tasks</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="update-account-tab" data-bs-toggle="tab" href="#update-account" role="tab">Update Account</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="housekeeperTabsContent">
+        <!-- Available Tasks Tab -->
+        <div class="tab-pane fade show active" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+            <table class="table mt-3">
+                <thead>
+                    <tr>
+                        <th>User email</th>
+                        <th>Summary</th>
+                        <th>Description</th>
+                        <th>Address</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task,user in available_tasks %}
+                    <tr>
+                        <td>{{ user.email }}</td>
+                        <td>{{ task.summary }}</td>
+                        <td>{{ task.description }}</td>
+                        <td>{{ task.address }}</td>
+                        <td>{{ task.price }}</td>
+                        <td>
+                            <a href="{{ url_for('main.accept_task', task_id=task.id) }}" class="btn btn-success btn-sm">Accept</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Manage Tasks Tab -->
+        <div class="tab-pane fade" id="manage-tasks" role="tabpanel" aria-labelledby="manage-tasks-tab">
+            <table class="table mt-3">
+                <thead>
+                    <tr>
+                        <th>Task ID</th>
+                        <th>Summary</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in managed_tasks %}
+                    <tr>
+                        <td>{{ task.id }}</td>
+                        <td>{{ task.summary }}</td>
+                        <td>{{ 'Completed' if task.is_done else 'Pending' }}</td>
+                        <td>
+                            <a href="{{ url_for('main.update_task_status', task_id=task.id) }}" class="btn btn-warning btn-sm">Change Status</a>
+                            <a href="{{ url_for('main.deny_task', task_id=task.id) }}" class="btn btn-danger btn-sm">Deny</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Update Account Tab -->
+        <div class="tab-pane fade" id="update-account" role="tabpanel" aria-labelledby="update-account-tab">
+            <form method="post" action="{{ url_for('main.update_housekeeper_account') }}">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" value="{{ housekeeper.email }}" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Account</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

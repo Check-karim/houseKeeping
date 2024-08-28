@@ -7,6 +7,13 @@
     <!-- Logout Button -->
     <a href="{{ url_for('main.logout') }}" class="btn btn-danger mb-3">Logout</a>
 
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
     <!-- Tabs for navigation -->
     <ul class="nav nav-tabs" id="userTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -27,8 +34,8 @@
                 <thead>
                     <tr>
                         <th>Task ID</th>
-                        <th>Housekeeper ID</th>
                         <th>Summary</th>
+                        <th>Description</th>
                         <th>Price</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -38,8 +45,8 @@
                     {% for task in tasks %}
                     <tr>
                         <td>{{ task.id }}</td>
-                        <td>{{ task.housekeeper_id }}</td>
                         <td>{{ task.summary }}</td>
+                        <td>{{ task.description }}</td>
                         <td>{{ task.price }}</td>
                         <td>{{ 'Completed' if task.is_done else 'Pending' }}</td>
                         <td>
