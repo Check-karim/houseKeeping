@@ -129,17 +129,19 @@ def create_task():
         address = request.form.get('address')
         phone = request.form.get('phone')
         summary = request.form.get('summary')
-        description = request.form.get('description')
+        description = request.form.get('full_description')
         price = request.form.get('price')
+
+        print(description)
 
         new_task = Task(
             user_id=user_id,
+            housekeeper_id=0,  # or assign based on some logic
             address=address,
             phone=phone,
             summary=summary,
             description=description,
             price=price,
-            housekeeper_id=0,  # or assign based on some logic
             is_done=False
         )
 
