@@ -9,6 +9,10 @@ main = Blueprint('main', __name__)  # routename= main
 def home():
     return render_template("index.html")
 
+@main.route('/getStarted', methods=['GET'])
+def getStarted():
+    return render_template("login-register.html")
+
 @main.route('/register', methods=['POST'])
 def register():
     email = request.form.get('email')
@@ -91,7 +95,9 @@ def housekeeper_dashboard():
 def admin_dashboard():
     if 'user_id' in session and session.get('user_type') == 'admin':
         admin = Admin.query.filter_by(id=session['user_id']).first()
-        return render_template("admin_dashboard.html", admin=admin)
+        task = Task()
+        tasks = task.get_all()
+        return render_template("admin_dashboard.html", admin=admin, tasks=tasks)
     else:
         return redirect(url_for('main.home'))
 

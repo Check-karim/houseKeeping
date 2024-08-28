@@ -1,71 +1,55 @@
 {% extends "base.html" %}
 {% block title %} HKMS - HomePage {% endblock %}
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">Login</button>
+ <!-- Navigation Bar -->
+ <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">HKMS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home</a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">Register</button>
+                <li class="nav-item">
+                    <a class="nav-link" href="#about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#get-started">Get Started</a>
                 </li>
             </ul>
-            {% for message in get_flashed_messages() %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-                    <form class="form-container mt-4" method="POST" action="{{ url_for('main.login') }}">
-                        <div class="mb-3">
-                            <label for="loginEmail" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="loginEmail" name="email" aria-describedby="emailHelp">
-                        </div>
-                        <div class="mb-3">
-                            <label for="loginPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="loginPassword" name="password">
-                        </div>
-                        <div class="mb-3">
-                            <label for="userType" class="form-label">Login as</label>
-                            <select class="form-select" id="userType" name="user_type">
-                                <option value="user">User</option>
-                                <option value="housekeeper">Housekeeper</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </form>
-                </div>
-                <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-                    <form class="form-container mt-4" method="POST" action="{{ url_for('main.register') }}">
-                        <div class="mb-3">
-                            <label for="registerEmail" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="registerEmail" name="email" aria-describedby="emailHelp">
-                        </div>
-                        <div class="mb-3">
-                            <label for="registerPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="registerPassword" name="password">
-                        </div>
-                        <div class="mb-3">
-                            <label for="registerConfirmPassword" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="registerConfirmPassword" name="confirm_password">
-                        </div>
-                        <div class="mb-3">
-                            <label for="userType" class="form-label">Register as</label>
-                            <select class="form-select" id="userType" name="user_type">
-                                <option value="user">User</option>
-                                <option value="housekeeper">Housekeeper</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
-</div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-text">
+        <h1>Welcome to HKMS</h1>
+        <p>Your one-stop solution for housekeeping management</p>
+        <a href="#get-started" class="btn btn-primary">Get Started</a>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="container mt-5">
+    <h2>About Us</h2>
+    <p>HKMS is designed to streamline your housekeeping tasks, allowing you to manage everything with ease and efficiency. Whether you're a homeowner or a housekeeper, our system helps you stay organized and connected.</p>
+</section>
+
+<!-- Get Started Section -->
+<section id="get-started" class="container mt-5">
+    <h2>Get Started</h2>
+    <p>Ready to simplify your housekeeping? Register now and start managing your tasks effortlessly.</p>
+    <a href="{{ url_for('main.getStarted') }}" class="btn btn-primary">Get Started</a>
+</section>
+
+<!-- Footer -->
+<footer class="footer mt-5">
+    <div class="container">
+        <p>&copy; 2024 Housekeeping Management System. All rights reserved.</p>
+    </div>
+</footer>
 {% endblock %}
