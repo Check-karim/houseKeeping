@@ -40,6 +40,7 @@
                                 <th>HouseKeeper Name</th>
                                 <th>Summary</th>
                                 <th>Description</th>
+                                <th>Working Hours</th>
                                 <th>Price</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -52,12 +53,15 @@
                                 <td>{{ task.housekeeper_name }}</td>
                                 <td>{{ task.summary }}</td>
                                 <td>{{ task.description }}</td>
+                                <td>{{ task.workinghours if task.workinghours else '0' }} Hours</td>
                                 <td>{{ task.price }}</td>
                                 <td>{{ 'Completed' if task.is_done else 'Pending' }}</td>
+                                {% if task.is_done is not true %}
                                 <td>
 <!--                                    <a href="{{ url_for('main.update_task', task_id=task.id) }}" class="btn btn-warning btn-sm">Edit</a>-->
                                     <a href="{{ url_for('main.delete_task', task_id=task.id) }}" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -80,6 +84,10 @@
                             <input type="text" class="form-control" id="summary" name="summary" required>
                         </div>
                         <div class="mb-3">
+                            <label for="workinghours" class="form-label">Working Hours</label>
+                            <input type="number" class="form-control" id="workinghours" name="workinghours" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="full-description" class="form-label">Full Description</label>
                             <textarea class="form-control" id="full-description" name="full_description" required></textarea>
                         </div>
@@ -88,13 +96,9 @@
                             <select class="form-control" id="housekeeper_id" name="housekeeper_id">
                                 <option value="" selected>Select a HouseKeeper</option>
                                 {% for housekeeper in housekeepers %}
-                                    <option value="{{ housekeeper.id }}">{{ housekeeper.name }}</option>
+                                    <option value="{{ housekeeper.id }}">{{ housekeeper.name }} : Price per Hour {{ housekeeper.priceperhour }}</option>
                                 {% endfor %}
                             </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="price" class="form-label">Price (RWF)</label>
-                            <input type="number" class="form-control" id="price" name="price" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Create Task</button>
                     </form>

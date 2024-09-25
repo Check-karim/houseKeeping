@@ -48,6 +48,7 @@ class Housekeeper(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255),nullable=False,unique=True)
     name = db.Column(db.String(255))
+    priceperhour = db.Column(db.String(255))
     password = db.Column(db.String(255))
     created_at = db.Column(db.DateTime(),nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime(),nullable=False, server_default=db.func.now(),onupdate=db.func.now())
@@ -58,6 +59,7 @@ class Housekeeper(db.Model):
             'id':self.id,
             'email':self.email,
             'name':self.name,
+            'priceperhour':self.priceperhour,
             'password':self.password
         }
 
@@ -78,7 +80,7 @@ class Housekeeper(db.Model):
     def get_unassigned(cls):
         # Filter housekeepers who have no tasks assigned
         return cls.query.outerjoin(Task, Task.housekeeper_id == Housekeeper.id).filter(
-            Task.housekeeper_id == None).all()
+            (Task.housekeeper_id == None) | (Task.is_done == True )).all()
     
     @classmethod
     def get_by_id(cls, id):
@@ -133,6 +135,7 @@ class Task(db.Model):
     user_id = db.Column(db.Integer, nullable=False)
     housekeeper_id = db.Column(db.Integer, nullable=False)
     housekeeper_name = db.Column(db.String(255), nullable=False)
+    workinghours = db.Column(db.String(255), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     summary = db.Column(db.String(255), nullable=False)
@@ -154,6 +157,7 @@ class Task(db.Model):
             'phone': self.phone,
             'summary': self.summary,
             'description': self.description,
+            'workinghours': self.workinghours,
             'price': self.price,
             'is_done': self.is_done
         }

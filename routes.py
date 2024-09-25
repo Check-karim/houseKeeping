@@ -87,7 +87,7 @@ def housekeeper_dashboard():
     if 'user_id' in session and session.get('user_type') == 'housekeeper':
         housekeeper_id = session['user_id']
         housekeeper = Housekeeper.query.filter_by(id=session['user_id']).first()
-        available_tasks = db.session.query(Task, User).join(User, Task.user_id == User.id).filter(Task.is_taken == False).all()
+        available_tasks = db.session.query(Task, User).join(User, Task.user_id == User.id).filter(Task.is_done == True).all()
         managed_tasks = Task.query.filter_by(housekeeper_id=housekeeper_id).all()
 
         print(housekeeper)
@@ -149,14 +149,16 @@ def create_task():
         phone = request.form.get('phone')
         summary = request.form.get('summary')
         description = request.form.get('full_description')
-        price = request.form.get('price')
         housekeeper_id = request.form.get('housekeeper_id')
+        workinghours = request.form.get('workinghours')
 
         housekeeper = Housekeeper.get_by_id(housekeeper_id)
+        price = housekeeper.priceperhour
         new_task = Task(
             user_id=user_id,
             housekeeper_id=housekeeper_id,  # or assign based on some logic
             housekeeper_name=housekeeper.name,
+            workinghours = workinghours,
             address=address,
             phone=phone,
             summary=summary,
@@ -320,12 +322,15 @@ def update_housekeeper_account():
         
         email = request.form.get('email')
         name = request.form.get('name')
+        priceperhour = request.form.get('priceperhour')
         password = request.form.get('password')
 
         if email:
             housekeeper.email = email
         if name:
             housekeeper.name = name
+        if priceperhour:
+            housekeeper.priceperhour = priceperhour
         if password:
             housekeeper.password = password
         

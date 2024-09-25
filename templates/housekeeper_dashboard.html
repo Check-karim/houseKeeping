@@ -18,7 +18,7 @@
     <!-- Tabs for navigation -->
     <ul class="nav nav-tabs" id="housekeeperTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="tasks-tab" data-bs-toggle="tab" href="#tasks" role="tab">Available Tasks</a>
+            <a class="nav-link active" id="tasks-tab" data-bs-toggle="tab" href="#tasks" role="tab">Completed Tasks</a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="manage-tasks-tab" data-bs-toggle="tab" href="#manage-tasks" role="tab">Manage Tasks</a>
@@ -39,7 +39,7 @@
                         <th>Description</th>
                         <th>Address</th>
                         <th>Price</th>
-                        <th>Actions</th>
+<!--                        <th>Actions</th>-->
                     </tr>
                 </thead>
                 <tbody>
@@ -50,9 +50,9 @@
                         <td>{{ task.description }}</td>
                         <td>{{ task.address }}</td>
                         <td>{{ task.price }}</td>
-                        <td>
-                            <a href="{{ url_for('main.accept_task', task_id=task.id) }}" class="btn btn-success btn-sm">Accept</a>
-                        </td>
+<!--                        <td>-->
+<!--                            <a href="{{ url_for('main.accept_task', task_id=task.id) }}" class="btn btn-success btn-sm">Accept</a>-->
+<!--                        </td>-->
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -78,7 +78,7 @@
                         <td>{{ 'Completed' if task.is_done else 'Pending' }}</td>
                         <td>
                             <a href="{{ url_for('main.update_task_status', task_id=task.id) }}" class="btn btn-warning btn-sm">Change Status</a>
-                            <a href="{{ url_for('main.deny_task', task_id=task.id) }}" class="btn btn-danger btn-sm">Deny</a>
+<!--                            <a href="{{ url_for('main.deny_task', task_id=task.id) }}" class="btn btn-danger btn-sm">Deny</a>-->
                         </td>
                     </tr>
                     {% endfor %}
@@ -90,8 +90,16 @@
         <div class="tab-pane fade" id="update-account" role="tabpanel" aria-labelledby="update-account-tab">
             <form method="post" action="{{ url_for('main.update_housekeeper_account') }}">
                 <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" value="{{ housekeeper.name }}" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
                     <label for="email" class="form-label">Email address</label>
                     <input type="email" value="{{ housekeeper.email }}" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="priceperhour" class="form-label">Price per Hour</label>
+                    <input type="number" value="{{ housekeeper.priceperhour }}" class="form-control" id="priceperhour" name="priceperhour" required>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
