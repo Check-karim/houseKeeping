@@ -37,6 +37,7 @@
                         <thead>
                             <tr>
                                 <th>Task ID</th>
+                                <th>HouseKeeper Name</th>
                                 <th>Summary</th>
                                 <th>Description</th>
                                 <th>Price</th>
@@ -48,12 +49,13 @@
                             {% for task in tasks %}
                             <tr>
                                 <td>{{ task.id }}</td>
+                                <td>{{ task.housekeeper_name }}</td>
                                 <td>{{ task.summary }}</td>
                                 <td>{{ task.description }}</td>
                                 <td>{{ task.price }}</td>
                                 <td>{{ 'Completed' if task.is_done else 'Pending' }}</td>
                                 <td>
-                                    <a href="{{ url_for('main.update_task', task_id=task.id) }}" class="btn btn-warning btn-sm">Edit</a>
+<!--                                    <a href="{{ url_for('main.update_task', task_id=task.id) }}" class="btn btn-warning btn-sm">Edit</a>-->
                                     <a href="{{ url_for('main.delete_task', task_id=task.id) }}" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
                             </tr>
@@ -82,6 +84,15 @@
                             <textarea class="form-control" id="full-description" name="full_description" required></textarea>
                         </div>
                         <div class="mb-3">
+                            <label for="housekeeper_id" class="form-label">HouseKeeper</label>
+                            <select class="form-control" id="housekeeper_id" name="housekeeper_id">
+                                <option value="" selected>Select a HouseKeeper</option>
+                                {% for housekeeper in housekeepers %}
+                                    <option value="{{ housekeeper.id }}">{{ housekeeper.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="price" class="form-label">Price (RWF)</label>
                             <input type="number" class="form-control" id="price" name="price" required>
                         </div>
@@ -92,6 +103,10 @@
                 <!-- Update Account Tab -->
                 <div class="tab-pane fade" id="update-account" role="tabpanel" aria-labelledby="update-account-tab">
                     <form method="post" action="{{ url_for('main.update_user_account') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" value="{{ user.name }}" class="form-control" id="name" name="name" required>
+                        </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Email address</label>
                             <input type="email" value="{{ user.email }}" class="form-control" id="email" name="email" required>

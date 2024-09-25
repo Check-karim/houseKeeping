@@ -5,6 +5,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255),nullable=False,unique=True)
+    name = db.Column(db.String(255))
     password = db.Column(db.String(255))
     created_at = db.Column(db.DateTime(),nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime(),nullable=False, server_default=db.func.now(),onupdate=db.func.now())
@@ -14,6 +15,7 @@ class User(db.Model):
         return{
             'id':self.id,
             'email':self.email,
+            'name':self.name,
             'password':self.password
         }
 
@@ -45,6 +47,7 @@ class Housekeeper(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255),nullable=False,unique=True)
+    name = db.Column(db.String(255))
     password = db.Column(db.String(255))
     created_at = db.Column(db.DateTime(),nullable=False, server_default=db.func.now())
     updated_at = db.Column(db.DateTime(),nullable=False, server_default=db.func.now(),onupdate=db.func.now())
@@ -54,6 +57,7 @@ class Housekeeper(db.Model):
         return{
             'id':self.id,
             'email':self.email,
+            'name':self.name,
             'password':self.password
         }
 
@@ -69,6 +73,12 @@ class Housekeeper(db.Model):
         for i in r:
             result.append(i.data)
         return result
+
+    @classmethod
+    def get_unassigned(cls):
+        # Filter housekeepers who have no tasks assigned
+        return cls.query.outerjoin(Task, Task.housekeeper_id == Housekeeper.id).filter(
+            Task.housekeeper_id == None).all()
     
     @classmethod
     def get_by_id(cls, id):
@@ -122,6 +132,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     housekeeper_id = db.Column(db.Integer, nullable=False)
+    housekeeper_name = db.Column(db.String(255), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     summary = db.Column(db.String(255), nullable=False)
@@ -138,6 +149,7 @@ class Task(db.Model):
             'id': self.id,
             'user_id': self.user_id,
             'housekeeper_id': self.housekeeper_id,
+            'housekeeper_name': self.housekeeper_name,
             'address': self.address,
             'phone': self.phone,
             'summary': self.summary,

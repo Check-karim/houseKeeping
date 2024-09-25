@@ -2,8 +2,11 @@ from flask import Blueprint, render_template, request, flash, session, redirect,
 from models.models import User, Housekeeper, Admin, Task
 from extensions import db
 from sqlalchemy.exc import SQLAlchemyError
+from flask_mail import Mail, Message
 
 main = Blueprint('main', __name__)  # routename= main
+
+mail = Mail()
 
 @main.route('/', methods=['GET'])
 def home():
@@ -16,6 +19,7 @@ def getStarted():
 @main.route('/register', methods=['POST'])
 def register():
     email = request.form.get('email')
+    name = request.form.get('name')
     password = request.form.get('password')
     confirm_password = request.form.get('confirm_password')
     user_type = request.form.get('user_type')
@@ -25,9 +29,9 @@ def register():
         return redirect(url_for('main.home'))
 
     if user_type == 'user':
-        new_user = User(email=email, password=password)
+        new_user = User(email=email,name=name, password=password)
     else:
-        new_housekeeper = Housekeeper(email=email, password=password)
+        new_housekeeper = Housekeeper(email=email,name=name, password=password)
 
     try:
         if user_type == 'user':
@@ -73,7 +77,8 @@ def user_dashboard():
         user = User.query.filter_by(id=session['user_id']).first()
         task = Task()
         tasks = task.get_by_user_id(user_id=session['user_id'])
-        return render_template("user_dashboard.html", user=user, tasks = tasks)
+        housekeepers = Housekeeper.get_unassigned()
+        return render_template("user_dashboard.html", user=user, tasks = tasks,housekeepers = housekeepers)
     else:
         return redirect(url_for('main.home'))
 
@@ -145,22 +150,30 @@ def create_task():
         summary = request.form.get('summary')
         description = request.form.get('full_description')
         price = request.form.get('price')
+        housekeeper_id = request.form.get('housekeeper_id')
 
-        print(description)
-
+        housekeeper = Housekeeper.get_by_id(housekeeper_id)
         new_task = Task(
             user_id=user_id,
-            housekeeper_id=0,  # or assign based on some logic
+            housekeeper_id=housekeeper_id,  # or assign based on some logic
+            housekeeper_name=housekeeper.name,
             address=address,
             phone=phone,
             summary=summary,
             description=description,
             price=price,
-            is_done=False
+            is_done=False,
+            is_taken = True
         )
 
         try:
             new_task.save()
+            # Send email notification to the housekeeper
+            housekeeper = Housekeeper.get_by_id(housekeeper_id)
+            msg = Message('New Task Assigned',sender='noreply@example.com',recipients=[housekeeper.email])
+            msg.body = f'Hello {housekeeper.name},\n\nYou have been assigned a new task. Details:\n\nSummary: {summary}\nDescription: {description}\nAddress: {address}\nPhone: {phone}\nPrice: {price}\n\nPlease log in to view the task.'
+            mail.send(msg)
+
             flash('Task created successfully!', 'success')
         except SQLAlchemyError as e:
             # Flash the specific error message
@@ -178,11 +191,14 @@ def create_task():
 def update_user_account():
     if 'user_id' in session and session.get('user_type') == 'user':
         email = request.form.get('email')
+        name = request.form.get('name')
         password = request.form.get('password')
         user = User.query.filter_by(id=session['user_id']).first()
 
         if email:
             user.email = email
+        if name:
+            user.name = name
         if password:
             user.password = password
         
@@ -303,10 +319,13 @@ def update_housekeeper_account():
         housekeeper = Housekeeper.query.get_or_404(session['user_id'])
         
         email = request.form.get('email')
+        name = request.form.get('name')
         password = request.form.get('password')
 
         if email:
             housekeeper.email = email
+        if name:
+            housekeeper.name = name
         if password:
             housekeeper.password = password
         
